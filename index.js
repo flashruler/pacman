@@ -1,7 +1,8 @@
 
 
 const canvas = document.querySelector('canvas')
-const c = canvas.getContext('2d')   
+const c = canvas.getContext('2d')  
+const scoreElement = document.querySelector('#score')
 
 canvas.width = innerWidth
 canvas.height = innerHeight
@@ -41,6 +42,22 @@ class Player {
     }
 }
 
+class Pellet {
+    constructor({position,}){
+        this.position = position
+        this.radius = 2
+    }
+
+    draw(){
+        c.beginPath()
+        c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2)
+        c.fillStyle = 'white'
+        c.fill()
+        c.closePath()
+    }
+    
+}
+
 const keys = {
     w:{
         pressed: false  
@@ -57,6 +74,7 @@ const keys = {
 }
 
 let lastKey = ''
+let score = 0
 
 const map =
     [
@@ -90,6 +108,7 @@ const map =
         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     ]
 
+const pellets = []
 const boundaries = []
 const player = new Player({
     position: {
@@ -105,6 +124,14 @@ const player = new Player({
 map.forEach((row,i) =>{
     row.forEach((symbol,j) => {
         switch(symbol){
+            case 0:
+                pellets.push(new Pellet({
+                    position: {
+                        x:j * 20 + 10,
+                        y:i * 20 + 10
+                    }
+                }))
+                break
             case 1:
                 boundaries.push(new Boundary({
                     position: {
@@ -125,8 +152,20 @@ function checkCollision({circle, rectangle}){
     }
 
 function animate(){
+
     requestAnimationFrame(animate)
     c.clearRect(0, 0, canvas.width, canvas.height)
+
+    for(let i =pellets.length-1; 0<i; i--){
+        const pellet = pellets[i]
+        pellet.draw()
+        if(Math.hypot(pellet.position.x - player.position.x, pellet.position.y - player.position.y)<pellet.radius + player.radius){
+            pellets.splice(i,1)
+            score+=1
+            scoreElement.innerHTML = score
+        }
+    }
+
     boundaries.forEach(boundary => {
         boundary.draw()
         if(checkCollision({circle:player, rectangle:boundary})){
@@ -140,7 +179,7 @@ function animate(){
     if(keys.w.pressed && lastKey === 'w'){
         for (let i=0; i< boundaries.length; i++) {
             const boundary = boundaries[i]
-            if(checkCollision({circle:{...player,velocity:{x:0,y:-3}}, rectangle:boundary})){
+            if(checkCollision({circle:{...player,velocity:{x:0,y:-1}}, rectangle:boundary})){
                 player.velocity.y = 0
                 break
             }
@@ -153,7 +192,7 @@ function animate(){
     else if(keys.s.pressed && lastKey === 's'){
         for (let i=0; i< boundaries.length; i++) {
             const boundary = boundaries[i]
-            if(checkCollision({circle:{...player,velocity:{x:0,y:3}}, rectangle:boundary})){
+            if(checkCollision({circle:{...player,velocity:{x:0,y:1}}, rectangle:boundary})){
                 player.velocity.y = 0
                 break
             }   
@@ -165,7 +204,7 @@ function animate(){
     else if(keys.a.pressed && lastKey === 'a'){
         for (let i=0; i< boundaries.length; i++) {
             const boundary = boundaries[i]
-            if(checkCollision({circle:{...player,velocity:{x:-3,y:0}}, rectangle:boundary})){
+            if(checkCollision({circle:{...player,velocity:{x:-1,y:0}}, rectangle:boundary})){
                 player.velocity.x = 0
                 break
             }
@@ -177,7 +216,7 @@ function animate(){
     else if(keys.d.pressed && lastKey === 'd'){
         for (let i=0; i< boundaries.length; i++) {  
             const boundary = boundaries[i]
-            if(checkCollision({circle:{...player,velocity:{x:3,y:0}}, rectangle:boundary})){
+            if(checkCollision({circle:{...player,velocity:{x:1,y:0}}, rectangle:boundary})){
                 player.velocity.x = 0
                 break
             }
