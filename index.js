@@ -25,6 +25,7 @@ class Player {
         this.position = position
         this.velocity = velocity
         this.radius = 9.9
+        this.isPowered=false
     }
 
     draw(){
@@ -39,6 +40,9 @@ class Player {
         this.position.x += this.velocity.x
         this.position.y += this.velocity.y
         this.draw()
+    }
+    setPowered(powered){
+        this.isPowered=powered
     }
 }
 
@@ -56,6 +60,20 @@ class Pellet {
         c.closePath()
     }
     
+}
+
+class Power_up{
+    constructor({position}){
+        this.position = position
+        this.radius = 5
+    }
+    draw(){
+        c.beginPath()
+        c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2)
+        c.fillStyle = 'green'
+        c.fill()
+        c.closePath()
+    }
 }
 
 const keys = {
@@ -110,6 +128,7 @@ const map =
 
 const pellets = []
 const boundaries = []
+const powerups = []
 const player = new Player({
     position: {
         x: 30,
@@ -140,9 +159,17 @@ map.forEach((row,i) =>{
                     }
                 }))
                 break
+            case 3:
+                powerups.push(new Power_up({
+                    position:{
+                        x:j * 20 + 10,
+                        y:i * 20 + 10
+                    }
+                }))
         }
     })
 })
+console.log(powerups)
 
 function checkCollision({circle, rectangle}){
     return(circle.position.x-circle.radius + circle.velocity.x <= rectangle.position.x+rectangle.width && 
@@ -163,6 +190,15 @@ function animate(){
             pellets.splice(i,1)
             score+=1
             scoreElement.innerHTML = score
+        }
+    }
+
+    for(let i =powerups.length-1; 0<=i; i--){
+        const powerup = powerups[i]
+        powerup.draw()
+        if(Math.hypot(powerup.position.x - player.position.x, powerup.position.y - player.position.y)<powerup.radius + player.radius){
+            powerups.splice(i,1)
+            player.isPowered(true)
         }
     }
 
