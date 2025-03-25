@@ -1,5 +1,3 @@
-
-
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')  
 const scoreElement = document.querySelector('#score')
@@ -198,7 +196,10 @@ function animate(){
         powerup.draw()
         if(Math.hypot(powerup.position.x - player.position.x, powerup.position.y - player.position.y)<powerup.radius + player.radius){
             powerups.splice(i,1)
-            player.isPowered(true)
+            player.setPowered(true)
+            setTimeout(() => {
+                player.setPowered(false)
+            }, 10000)
         }
     }
 
